@@ -1,3 +1,10 @@
+/**
+ * pecolify: peco works your program
+ *
+ * @package pecolify
+ * @author Yoshiaki Sugimoto
+ * @license MIT
+ */
 package pecolify
 
 import (
@@ -8,6 +15,11 @@ import (
 	"strings"
 )
 
+//
+// Runner struct
+//
+// stack some temporary data
+//
 type Runner struct {
 	tmpFile    *os.File
 	pipeReader *os.File
@@ -18,6 +30,12 @@ type Runner struct {
 	captureBuffer string
 }
 
+//
+// Create Runner
+//
+// @public
+// @returns *Runner
+//
 func New() *Runner {
 	return &Runner{
 		oldStdout: os.Stdout,
@@ -25,6 +43,13 @@ func New() *Runner {
 	}
 }
 
+//
+// Data pass to peco and get selected line
+//
+// @public
+// @param data []string
+// returns string, error
+//
 func (r *Runner) Transform(data []string) (string, error) {
 	var e error
 
@@ -56,6 +81,13 @@ func (r *Runner) Transform(data []string) (string, error) {
 	return r.captureBuffer, nil
 }
 
+//
+// Capture peco's output
+//
+// @private
+// @param blocker chan int
+// returns void
+//
 func (r *Runner) captureOutput(blocker chan int) {
 	var lines string
 
@@ -70,9 +102,19 @@ func (r *Runner) captureOutput(blocker chan int) {
 	blocker <- 1
 }
 
+//
+// Run the peco
+//
+// @private
+// @param data []string
+// returns error
+//
 func (r *Runner) runPeco(data []string) error {
 	buffer := strings.Join(data, "\n")
 	ioutil.WriteFile(r.tmpFile.Name(), []byte(buffer), 0644)
+
+	// Make dummy arguments.
+	// Peco will process from tempfile...
 	os.Args = []string{"peconize", r.tmpFile.Name()}
 
 	// restore
