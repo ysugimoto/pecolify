@@ -63,12 +63,7 @@ func (r *Runner) Transform(data []string) (string, error) {
 	os.Stdout = r.pipeWriter
 
 	if e = r.runPeco(data); e != nil {
-		r.pipeWriter.Close()
-		if e != peco.ErrUserCanceled {
-			return "", e
-		} else {
-			return "", nil
-		}
+		return "", e
 	}
 
 	// create blocking channel
@@ -125,7 +120,11 @@ func (r *Runner) runPeco(data []string) error {
 	}()
 
 	p := peco.New()
-	p.Run(context.Background())
+	if err := p.Run(context.Background()); err != nil {
+		if err.Error() == "user canceled" {
+			return err
+		}
+	}
 	p.PrintResults()
 
 	return nil
