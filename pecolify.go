@@ -84,7 +84,7 @@ func (r *Runner) Transform(data []string) (string, error) {
 // @param blocker chan int
 // returns void
 //
-func (r *Runner) captureOutput(blocker chan int) {
+func (r *Runner) captureOutput(blocker chan struct{}) {
 	var lines string
 
 	defer r.pipeReader.Close()
