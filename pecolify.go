@@ -9,6 +9,7 @@ package pecolify
 
 import (
 	"bufio"
+	"context"
 	"github.com/peco/peco"
 	"io/ioutil"
 	"os"
@@ -71,7 +72,7 @@ func (r *Runner) Transform(data []string) (string, error) {
 	}
 
 	// create blocking channel
-	blocker := make(chan int, 1)
+	blocker := make(chan struct{}, 1)
 
 	go r.captureOutput(blocker)
 
@@ -99,7 +100,7 @@ func (r *Runner) captureOutput(blocker chan int) {
 	}
 
 	r.captureBuffer = lines
-	blocker <- 1
+	blocker <- struct{}{}
 }
 
 //
@@ -123,10 +124,9 @@ func (r *Runner) runPeco(data []string) error {
 		os.Args = r.oldArgs
 	}()
 
-	cli := peco.CLI{}
-	if err := cli.Run(); err != nil {
-		return err
-	}
+	p := peco.New()
+	p.Run(context.Background())
+	p.PrintResults()
 
 	return nil
 }
